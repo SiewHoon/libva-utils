@@ -74,6 +74,11 @@ AC_SUBST(LIBVA_UTILS_MINOR_VERSION)
 AC_SUBST(LIBVA_UTILS_MICRO_VERSION)
 AC_SUBST(LIBVA_UTILS_VERSION)
 
+LIBVA_LIB_VERSION=2.0
+AC_SUBST([LIBVA_LIB_VERSION])
+AC_DEFINE_UNQUOTED([LIBVA_LIB_VERSION], ["$LIBVA_LIB_VERSION"],
+  [Libva Library Version])
+
 AC_ARG_ENABLE(drm,
     [AC_HELP_STRING([--enable-drm],
                     [build with VA/DRM API support @<:@default=yes@:>@])],
@@ -132,14 +137,14 @@ fi
 # Check for DRM (mandatory)
 LIBDRM_VERSION=libdrm_version
 PKG_CHECK_MODULES([DRM], [libdrm >= $LIBDRM_VERSION])
-PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm])
+PKG_CHECK_MODULES([LIBVA_DRM], [libva-drm-$LIBVA_LIB_VERSION])
 AC_SUBST(LIBDRM_VERSION)
 
 # Check for libva (for dynamic linking)
 LIBVA_API_MIN_VERSION=libva_api_min_version
-PKG_CHECK_MODULES([LIBVA], [libva >= $LIBVA_API_MIN_VERSION])
+PKG_CHECK_MODULES([LIBVA], [libva-$LIBVA_LIB_VERSION >= $LIBVA_API_MIN_VERSION])
 AC_SUBST(LIBVA_VERSION)
-LIBVA_API_VERSION=`$PKG_CONFIG --modversion libva`
+LIBVA_API_VERSION=`$PKG_CONFIG --modversion libva-$LIBVA_LIB_VERSION`
 VA_MAJOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f1`
 VA_MINOR_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f2`
 VA_MICRO_VERSION=`echo "$LIBVA_API_VERSION" | cut -d'.' -f3`
@@ -156,7 +161,7 @@ AM_CONDITIONAL(USE_DRM, test "$USE_DRM" = "yes")
 # Check for X11
 USE_X11="no"
 if test "x$enable_x11" != "xno"; then
-    PKG_CHECK_MODULES([X11],    [x11 xext xfixes libva-x11],
+    PKG_CHECK_MODULES([X11],    [x11 xext xfixes libva-x11-$LIBVA_LIB_VERSION],
         [USE_X11="yes"], [:])
 
     if test "x$USE_X11" = "xno" -a "x$enable_x11" = "xyes"; then
@@ -175,7 +180,7 @@ AC_SUBST(WAYLAND_API_VERSION)
 
 USE_WAYLAND="no"
 if test "x$enable_wayland" != "xno"; then
-    PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version libva-wayland],
+    PKG_CHECK_MODULES([WAYLAND], [wayland-client >= wayland_api_version libva-wayland-$LIBVA_LIB_VERSION],
         [USE_WAYLAND="yes"], [:])
 
     if test "x$USE_WAYLAND" = "xno" -a "x$enable_wayland" = "xyes"; then
